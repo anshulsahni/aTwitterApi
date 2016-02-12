@@ -1,0 +1,17 @@
+{
+  "name": "atwitter",
+  "version": "1.0.0",
+  "description": "backend task for nodejs",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ansh",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.14.2",
+    "express": "^4.13.4",
+    "md5": "^2.0.0",
+    "mongoose": "^4.4.2"
+  }
+}
