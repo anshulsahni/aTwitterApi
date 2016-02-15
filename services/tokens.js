@@ -35,14 +35,15 @@ Token.expire=function(tokenId,callback){
     var errResponse;
     var response;
     if(error)
-        errResponse={"message":"CriticalDatabaseError"};
+        errResponse={"message":{"CriticalDatabaseError":true}};
     else {
       if(numAffected==0)
-        errResponse={"message":"TokenExipiredOrDoesNotExist"}
+        errResponse={"message":{"TokenExipiredOrDoesNotExist":true}}
       else {
-        response={"message":"TokenSuccessfullyExpired"}
+        response={"message":{"TokenSuccessfullyExpired":true}}
       }
     }
+    callback(errResponse,response);
   })
 }
 

@@ -17,6 +17,9 @@ router.route("/sign_in")
     "password"
   ]),users.signIn)
 
+router.route("/sign_out")
+  .put(authorise,users.signOut)
+
 router.route("/follow")
   .put(authorise,users.follow)
 

@@ -18,8 +18,9 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:false}));
 var users=require("./routes/users");
 var tweets=require("./routes/tweets");
+
 app.use("/users",users);
-app.use("/tweets",tweets)
+app.use("/tweets",tweets);
 
 
 

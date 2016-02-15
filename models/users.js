@@ -268,9 +268,7 @@ User.getAllUsers=function(callback){
 }
 
 User.signOut=function(tokenId,callback){
-  var errResponse;
-  var response;
-
+  token.expire(tokenId,callback)
 }
 
 

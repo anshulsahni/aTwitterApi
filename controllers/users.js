@@ -14,6 +14,12 @@ UserController.signIn=function(req,res){
   })
 }
 
+UserController.signOut=function(req,res){
+  userModel.signOut(req.body.tokenId,function(error,result){
+    respond(res,error,result);
+  })
+}
+
 UserController.follow=function(req,res){
   userModel.follow(req.body.userHandle,req.body.followHandle,function(error,result){
     respond(res,error,result);
