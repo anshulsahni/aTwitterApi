@@ -44,4 +44,27 @@ UserController.getFollow=function(req,res){
   })
 }
 
+UserController.getAllUsers=function(req,res){
+  userModel.getAllUsers(function(error,result){
+    respond(res,error,result);
+  })
+}
+
+UserController.getNotifications=function(req,res){
+  userModel.getNotifications(req.body.userHandle,function(error,result){
+    respond(res,error,result);
+  })
+}
+
+UserController.getUnreadNotif=function(req,res){
+  userModel.getUnreadNotif(req.body.userHandle,function(error,result){
+    respond(res,error,result);
+  })
+}
+
+UserController.markNotifRead=function(req,res){
+  userModel.markNotificationsRead(req.body.userHandle,function(error,result){
+    respond(res,error,result);
+  })
+}
 module.exports=UserController;

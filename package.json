@@ -12,6 +12,7 @@
     "body-parser": "^1.14.2",
     "express": "^4.13.4",
     "md5": "^2.0.0",
-    "mongoose": "^4.4.2"
+    "mongoose": "^4.4.2",
+    "socket.io": "^1.4.5"
   }
 }

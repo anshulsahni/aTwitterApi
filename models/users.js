@@ -32,7 +32,7 @@ User.signIn=function(credentials,callback){
       if(error){
        errResponse={message:{CriticalDatabaseError:true}};
        callback(errResponse,response);
-      }
+     }
       else {
         if(!result){
           errResponse={message:{InvalidEmailOrPassword:true}};
@@ -133,7 +133,7 @@ User.get=function(userHandle,callback){
 User.getKey=function(userHandle,callback){
   var errResponse;
   var response;
-  userData.findOne({"userHandle":userHandle},{"_id":1},function(error,result){
+  userData.findOne({"userHandle":userHandle},{"_id":1,"userHandle":1},function(error,result){
     if(error)
       errResponse={message:{"CriticalDatabaseError":true}}
     else{
@@ -178,4 +178,100 @@ User.getFollow=function(userHandle,callback){
     callback(errResponse,response);
   })
 }
+
+User.addNotification=function(userHandle,notification){
+  userData.update({userHandle:userHandle},{$push:{notifications:notification}},function(error,numAffected){
+    console.log(userHandle)
+    return;
+  })
+}
+
+User.getNotifications=function(userHandle,callback){
+  var errResponse;
+  var response;
+  userData.findOne({userHandle:userHandle},{notifications:1}).sort({"notifications.creationTime":-1}).exec(function(error,result){
+    if(error)
+      errResponse={message:{CriticalDatabaseError:true}}
+    else{
+      if(!result)
+          result={notifications:[]};
+        result.notifications.sort(function(a,b){return new Date(b)-new Date(a)})
+        response={message:{notifications:true},data:result.notifications}
+    }
+    callback(errResponse,response);
+  })
+}
+
+User.getUnreadNotif=function(userHandle,callback){
+  var errResponse;
+  var response;
+  userData.findOne({userHandle:userHandle,"notifications.read":false},{notifications:1},function(error,result){
+    if(error)
+      errResponse={message:{CriticalDatabaseError:true}}
+    else {
+      if(!result)
+        result={notifications:[]};
+      response={message:{notifications:true},data:result.notifications}
+    }
+    callback(errResponse,response);
+  })
+}
+
+User.clearNotifications=function(userHandle){
+  userData.update({userHandle:userHandle},{$set:{notifications:[]}},function(error,num){
+    return;
+  });
+}
+
+User.markNotificationsRead=function(userHandle,callback){
+  console.log(userHandle);
+  userData.update({
+    userHandle:userHandle,
+    notifications:{
+      $elemMatch:{read:false}
+    }
+  },{
+      $set:{
+        "notifications.$.read":true
+      }
+    },function(error,num){
+      return;
+    })
+  }
+
+User.getFollows=function(userHandle,callback){
+  var errResponse;
+  var respone;
+  userData.findOne({userHandle:userHandle},{follow:1}).lean().exec(function(error,result){
+    if(error)
+      errResponse={message:{CriticalDatabaseError:true}};
+    else{
+      response={message:{FollowsList:true},data:result.follow};
+    }
+    callback(errResponse,response);
+  })
+}
+
+User.getAllUsers=function(callback){
+  var response;
+  var errResponse;
+  userData.find({},{"follow":0,"_id":0,"__v":0},function(error,result){
+    if(error)
+      errResponse={message:{CriticalDatabaseError:true}};
+    else{
+      if(!result)
+        result=[];
+      response={message:{AllUsersList:true},data:result}
+    }
+    callback(errResponse,response);
+  })
+}
+
+User.signOut=function(tokenId,callback){
+  var errResponse;
+  var response;
+
+}
+
+
 module.exports=User;

@@ -6,7 +6,14 @@ var userSchema=new mongoose.Schema({
   password:{type:String,required:true,select:false},                    //stored using md5 hash
   userHandle:{type:String,unique:true,required:true},          //unique userHandle for user to identifiy themeselves
   follow:[{type:mongoose.Schema.Types.ObjectId,ref:"users"}],
+  notifications:[{
+    author:{type:String},
+    content:{type:String},
+    read:{type:Boolean},
+    creationTime:{type:Date,default:Date.now}
+  }],
   creationTime:{type:Date,default:Date.now,select:false}
+
 })
 
 module.exports=mongoose.model("users",userSchema);

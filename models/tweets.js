@@ -1,4 +1,6 @@
 var tweetData=require("./schemas/tweets");
+var users=require("./users");
+var mongoose=require("mongoose");
 var Tweet={};
 
 Tweet.create=function(content,author,callback){
@@ -10,7 +12,7 @@ Tweet.create=function(content,author,callback){
       errResponse={message:{"CriticalDatabaseError":true}};
     }
     else {
-      response={message:{"TweetCreated":true},data:{tweetId:new_tweet._id}}
+      response={message:{"TweetCreated":true},data:{tweetId:new_tweet._id,creationTime:new_tweet.creationTime}}
     }
     callback(errResponse,response);
   })
@@ -26,6 +28,7 @@ Tweet.get=function(tweetId,callback){
       if(result==null)
         errResponse={message:{"TweetNotFound":true}}
       else {
+        result.content=result.content.join(" ");
         response={message:{"TweetFound":true},data:result};
       }
     }
@@ -34,15 +37,55 @@ Tweet.get=function(tweetId,callback){
 }
 
 Tweet.byAuthor=function(authorId,callback){
-  tweetData.find({"author":authorId},{"__v":0}).sort({creationTime:-1}).populate("author","-_id -__v").exec(function(error,result){
-    var errResponse;
-    var response;
-    if(error)
-      errResponse={message:{"CriticalDatabaseError":true}}
+  users.getKey(authorId,function(error,result){
+      var id=result.data._id;
+      tweetData.find({"author":id},{"__v":0}).sort({creationTime:-1}).populate("author","-_id -__v").exec(function(error,result){
+        var errResponse;
+        var response;
+        console.log(error);
+        if(error)
+          errResponse={message:{"CriticalDatabaseError":true}}
+        else {
+          if(result==null)
+            result=[];
+          else
+            for(i in result) {result[i].content=result[i].content.join(" ");}
+          response={message:{"TweetsByAuthor":true},data:result}
+        }
+        callback(errResponse,response);
+      })
+    })
+  }
+
+Tweet.byFollows=function(userHandle,callback){
+  var errResponse;
+  var response;
+  users.getFollows(userHandle,function(error,result){
+    if(error){
+      errResponse={message:{CriticalDatabaseError:true}};
+      callback(errResponse,response);
+    }
     else {
-      if(result==null)
-        result=[];
-      response={message:{"TweetsByAuthor":true},data:result}
+      tweetData.find({author:{$in:result.data}}).sort({creationTime:-1}).populate("author","-_id -__v").exec(function(error,result){
+        if(error)
+          errResponse={message:{CriticalDatabaseError:true}};
+        else {
+          response={message:{FollowsTweets:true},data:result};
+        }
+        callback(errResponse,response);
+      })
+    }
+  })
+}
+
+Tweet.allTweets=function(callback){
+  var errResponse;
+  var response;
+  tweetData.find({},{"__v":0}).sort({creationTime:-1}).populate("author","-_id -__v").exec(function(error,result){
+    if(error)
+      errResponse={message:{CriticalDatabaseError:true}};
+    else{
+      response={message:{allTweets:true},data:result}
     }
     callback(errResponse,response);
   })

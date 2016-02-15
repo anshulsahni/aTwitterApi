@@ -8,7 +8,8 @@ router.route("/")
     "userHandle",
     "password",
     "email"
-  ]),users.signUp);
+  ]),users.signUp)
+  .get(users.getAllUsers)
 
 router.route("/sign_in")
   .post(checkParams([
@@ -20,7 +21,16 @@ router.route("/follow")
   .put(authorise,users.follow)
 
 router.route("/unfollow")
-  .put(authorise,users.unfollow);
+  .put(authorise,users.unfollow)
+
+router.route("/notifications")
+  .post(authorise,users.getNotifications)
+
+router.route("/notifications/unread")
+  .post(authorise,users.getUnreadNotif)
+
+router.route("/notifications/read")
+  .put(authorise,users.markNotifRead)
 
 router.route("/:userHandle/follow")
   .get(users.getFollow)

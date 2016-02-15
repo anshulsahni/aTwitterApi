@@ -1,7 +1,8 @@
 var tokens=require("../services/tokens");
 var tweets=require("../models/tweets");
 var user=require("../models/users");
-var connected_users={};
+var mongoose=require("mongoose");
+var connectedUsers={};
 module.exports=function(socket_io){
   //socket gets connected
   socket_io.on("connection",function(socket){
@@ -12,26 +13,15 @@ module.exports=function(socket_io){
           socket.disconnect();
       else {
         if(result.message.TokenValid){
-          connected_users[userHandle]=socket;
-          user.getKey(userHandle,function(error,result){
-            tweets.byAuthor(result.data._id,function(error,result){
-                if(!error){
-                  // var data={"content":result.data.content,"author":result.data.author.name,re}
-                  socket.emit("TweetsIncoming",result);
-                }
-                else {
-                  console.log(error);
-                }
-            })
-          })
+          connectedUsers[userHandle]=socket;
         }
       }
     })
     //socket gets disconnected
     socket.on("disconnect",function(){
-      for(i in connected_users){
-        if(connected_users[i]==socket){
-          delete(connected_users[i]);
+      for(i in connectedUsers){
+        if(connectedUsers[i]==socket){
+          delete(connectedUsers[i]);
           break;
         }
       }
@@ -43,10 +33,30 @@ module.exports=function(socket_io){
         if(error)
           socket.disconnect();
         else{
+          var content=data.content;
           if(result.message.TokenValid){
+            var contentArray=[];
+            var prev=0;
+            for(var i=0;i<content.length;i++){
+              if(content[i]=="@" && (content[i-1]==" " || i==0)){
+                var end=content.indexOf(" ",i+1);
+                var tmp=(content.substring(i+1,end==-1?content.length:end));
+                user.getKey(tmp,function(error,result){
+                  if(!error){
+                    if(connectedUsers[result.data.userHandle])
+                      connectedUsers[result.data.userHandle].emit("TweetNotify",{author:data.userHandle,content:content});
+                    user.addNotification(result.data.userHandle,{author:data.userHandle,content:content,read:false})
+                  }
+                })
+              }
+            }
+            // if(prev!=content.length)
+              // contentArray.push(content.substring(prev,content.length));
+            // console.log(contentArray);
+            contentArray.push(content);
             user.getKey(data.userHandle,function(error,result){
               var id=result.data._id;
-              tweets.create(data.content,id,function(error,result){
+              tweets.create(contentArray,id,function(error,result){
                 tweets.get(result.data.tweetId,function(error,result){
                   socket.emit("TweetUpdate",result)
                 })
@@ -56,7 +66,34 @@ module.exports=function(socket_io){
         }
       })
     })
-
+    socket.on("FollowsTweets",function(data){
+      tokens.checkValidity(data.tokenId,data.userHandle,function(error,result){
+        if(error)
+          socket.disconnect();
+        else {
+          if(result.message.TokenValid){
+            tweets.byFollows(data.userHandle,function(error,result){
+              if(!error){
+                  socket.emit("TransferFollowsTweets",result);
+              }
+            })
+          }
+        }
+      })
+    })
+    socket.on("DemandTweets",function(data){
+      tweets.byAuthor(data.userHandle,function(error,result){
+        if(!error){
+          socket.emit("TweetsIncoming",result);
+        }
+      })
+    })
+    socket.on("AllTweets",function(){
+      tweets.allTweets(function(error,result){
+        if(!error)
+          socket.emit("TransferAllTweets",result);
+      })
+    })
   })
 
 
