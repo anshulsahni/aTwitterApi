@@ -50,15 +50,13 @@ module.exports=function(socket_io){
                 })
               }
             }
-            // if(prev!=content.length)
-              // contentArray.push(content.substring(prev,content.length));
-            // console.log(contentArray);
             contentArray.push(content);
             user.getKey(data.userHandle,function(error,result){
               var id=result.data._id;
               tweets.create(contentArray,id,function(error,result){
                 tweets.get(result.data.tweetId,function(error,result){
                   socket.emit("TweetUpdate",result)
+                  io.sockets.emit("TransferAllTweets",result)
                 })
               })
             })
