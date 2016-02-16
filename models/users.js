@@ -230,9 +230,12 @@ User.clearNotifications=function(userHandle){
 }
 
 User.markNotificationsRead=function(userHandle,callback){
-  console.log(userHandle);
+  var obj=this;
   userData.update({userHandle:userHandle,"notifications.read":false},{$set:{"notifications.$.read":true}},{multi:true},function(error,num){
-
+    console.log(num);
+      if(num.n>0)
+        obj.markNotificationsRead(userHandle,callback)
+      return;
     })
   }
 

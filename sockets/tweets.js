@@ -56,7 +56,7 @@ module.exports=function(socket_io){
               tweets.create(contentArray,id,function(error,result){
                 tweets.get(result.data.tweetId,function(error,result){
                   socket.emit("TweetUpdate",result)
-                  io.sockets.emit("TransferAllTweets",result)
+                  io.sockets.emit("TransferAllTweetsUpdate",result)
                 })
               })
             })

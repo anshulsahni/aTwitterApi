@@ -38,22 +38,27 @@ Tweet.get=function(tweetId,callback){
 
 Tweet.byAuthor=function(authorId,callback){
   users.getKey(authorId,function(error,result){
-      var id=result.data._id;
-      tweetData.find({"author":id},{"__v":0}).sort({creationTime:-1}).populate("author","-_id -__v").exec(function(error,result){
-        var errResponse;
-        var response;
-        console.log(error);
-        if(error)
-          errResponse={message:{"CriticalDatabaseError":true}}
-        else {
-          if(result==null)
-            result=[];
-          else
-            for(i in result) {result[i].content=result[i].content.join(" ");}
-          response={message:{"TweetsByAuthor":true},data:result}
-        }
-        callback(errResponse,response);
-      })
+      if(!error){
+        var id=result.data._id;
+        tweetData.find({"author":id},{"__v":0}).sort({creationTime:-1}).populate("author","-_id -__v").exec(function(error,result){
+          var errResponse;
+          var response;
+          console.log(error);
+          if(error)
+            errResponse={message:{"CriticalDatabaseError":true}}
+          else {
+            if(result==null)
+              result=[];
+            else
+              for(i in result) {result[i].content=result[i].content.join(" ");}
+            response={message:{"TweetsByAuthor":true},data:result}
+          }
+          callback(errResponse,response);
+        })
+      }
+      else{
+        callback(error,result);
+      }
     })
   }
 
