@@ -205,13 +205,19 @@ User.getNotifications=function(userHandle,callback){
 User.getUnreadNotif=function(userHandle,callback){
   var errResponse;
   var response;
-  userData.findOne({userHandle:userHandle,"notifications.read":false},{notifications:1},function(error,result){
+  userData.findOne({userHandle:userHandle,"notifications.read":false}).lean().exec(function(error,result){
     if(error)
       errResponse={message:{CriticalDatabaseError:true}}
     else {
       if(!result)
         result={notifications:[]};
-      response={message:{notifications:true},data:result.notifications}
+      res={notifications:[]};
+      for(i in result.notifications){
+        if(result.notifications[i].read==false){
+          res.notifications.push(result.notifications[i]);
+        }
+      }
+      response={message:{notifications:true},data:res.notifications}
     }
     callback(errResponse,response);
   })
@@ -225,17 +231,8 @@ User.clearNotifications=function(userHandle){
 
 User.markNotificationsRead=function(userHandle,callback){
   console.log(userHandle);
-  userData.update({
-    userHandle:userHandle,
-    notifications:{
-      $elemMatch:{read:false}
-    }
-  },{
-      $set:{
-        "notifications.$.read":true
-      }
-    },function(error,num){
-      return;
+  userData.update({userHandle:userHandle,"notifications.read":false},{$set:{"notifications.$.read":true}},{multi:true},function(error,num){
+
     })
   }
 
