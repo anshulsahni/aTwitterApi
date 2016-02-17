@@ -92,5 +92,9 @@ module.exports=function(socket_io){
           socket.emit("TransferAllTweets",result);
       })
     })
+    socket.on("NotifsRead",function(data){
+      user.markNotificationsRead(data.userHandle);
+      socket.emit("NotifsMarkedRead");
+    })
   })
 }
