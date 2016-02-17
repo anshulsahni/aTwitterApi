@@ -38,6 +38,9 @@ router.route("/notifications/read")
 router.route("/:userHandle/follow")
   .get(users.getFollow)
 
+router.route("/:userHandle/followers")
+  .get(users.getFollowers);
+
 router.route("/all")
   .get(users.getAllUserHandles);
 

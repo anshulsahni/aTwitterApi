@@ -43,8 +43,10 @@ module.exports=function(socket_io){
                 var tmp=(content.substring(i+1,end==-1?content.length:end));
                 user.getKey(tmp,function(error,result){
                   if(!error){
-                    if(connectedUsers[result.data.userHandle])
+                    if(connectedUsers[result.data.userHandle]){
                       connectedUsers[result.data.userHandle].emit("TweetNotify",{author:data.userHandle,content:content});
+                      connectedUsers[result.data.userHandle].emit("TweetNotifyContent",{author:data.userHandle,content:content,creationTime:Date.now()})
+                    }
                     user.addNotification(result.data.userHandle,{author:data.userHandle,content:content,read:false})
                   }
                 })
@@ -57,6 +59,15 @@ module.exports=function(socket_io){
                 tweets.get(result.data.tweetId,function(error,result){
                   socket.emit("TweetUpdate",result)
                   io.sockets.emit("TransferAllTweetsUpdate",result)
+                  var res1=result;
+                  user.getFollowers(data.userHandle,function(error,result){
+                    if(!error){
+                      for(i in result.data){
+                        if(connectedUsers[result.data[i].userHandle])
+                          connectedUsers[result.data[i].userHandle].emit("FollowsTweetsUpdate",res1)
+                      }
+                    }
+                  })
                 })
               })
             })
@@ -93,7 +104,7 @@ module.exports=function(socket_io){
       })
     })
     socket.on("NotifsRead",function(data){
-      user.markNotificationsRead(data.userHandle);
+      user.markNotificationsRead(data);
       socket.emit("NotifsMarkedRead");
     })
   })

@@ -73,4 +73,10 @@ UserController.markNotifRead=function(req,res){
     respond(res,error,result);
   })
 }
+
+UserController.getFollowers=function(req,res){
+  userModel.getFollowers(req.params.userHandle,function(error,result){
+    respond(res,error,result);
+  })
+}
 module.exports=UserController;

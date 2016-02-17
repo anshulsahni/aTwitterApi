@@ -241,7 +241,7 @@ User.markNotificationsRead=function(userHandle,callback){
 
 User.getFollows=function(userHandle,callback){
   var errResponse;
-  var respone;
+  var response;
   userData.findOne({userHandle:userHandle},{follow:1}).lean().exec(function(error,result){
     if(error)
       errResponse={message:{CriticalDatabaseError:true}};
@@ -264,6 +264,27 @@ User.getAllUsers=function(callback){
       response={message:{AllUsersList:true},data:result}
     }
     callback(errResponse,response);
+  })
+}
+
+User.getFollowers=function(userHandle,callback){
+  var errResponse;
+  var response;
+  User.getKey(userHandle,function(error,result){
+    if(!error){
+      userData.find({follow:{$in:[result.data._id]}},{userHandle:1},function(error,result){
+        if(!error)
+          response={message:{"UsersFollowers":true},data:result};
+        else {
+          errResponse={message:{"CriticalDatabaseError":true}}
+        }
+        callback(errResponse,response);
+      })
+    }
+    else{
+      errResponse=error;
+      callback(errResponse,response);
+    }
   })
 }
 
